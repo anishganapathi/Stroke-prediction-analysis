@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <title>Stroke prediction</title>
+    <style>
+        /*just bg and body style*/
+        body {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            height: 100vh;
+            margin: 40px;
+            font-family: 'Oslo Light', sans-serif; /* Add Oslo Light font */
+        }
+
+        .form-control {
+            border-radius: 15px;
+            width: 200px;
+        }
+
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Remove line breaks for heading tags */
+        h1, h2, h3, h4, h5, h6 {
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            border-radius: 5px;
+            text-align: center;
+        }
+        .image{
+            width: 100%;
+            height: 100%;
+            border-radius: 75px;
+        }
+
+        .btn-container {
+            background: #ffffff;
+            box-shadow: 0 19px 38px rgba(0, 0, 0, 0.30), 0 15px 12px rgba(0, 0, 0, 0.22);
+            border-radius: 75px;
+            padding: 10px;
+        }
+
+        .head {
+            font-weight: bolder;
+            color: #dcdfe0;
+        }
+
+        .btn-primary {
+            color: #ffffff;
+            text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+            background-color: #4e438b !important;
+            border-color: #023047 !important;
+            padding: 10px;
+            margin-top: 15px;
+            width: 150px !important;
+            transition: all 0.3s ease;
+            border-radius: 50px; /* Adding border radius */
+        }
+
+        /* Hover animation for the predict button */
+        .btn-primary:hover {
+            background-color: #A084E8 !important;
+            transform: scale(1.05);
+            border-radius: 75px !important;
+            width: 150px;
+        }
+
+        label {
+            width: 50%;
+        }
+
+        #predict {
+            display: none;
+        }
+
+        .form-group {
+            padding: 2px;
+        }
+
+        .form-select {
+            padding: 5px;
+            border-radius: 15px;
+            border: 1px solid black;
+            width: 200px;
+        }
+
+        .prediction {
+            background: #4e438bc4;
+            color: aliceblue;
+            border-radius: 30px;
+        }
+    </style>
+    <!--Font Awesome-->
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="head" style="font-style: normal;">➡️PREDICT THE STROKE⬅️</h1>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="btn-container">
+
+                    <!-- Main Input For Receiving Query to our ML -->
+                    <form action="{{ url_for('predict')}}" method="post" class="form-inline">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <img class="image" src="https://i.ibb.co/tYF5kmW/pred-analysis.jpg" width="100%" height="100%" />
+                            </div>
+                            <div class="col-md-6">
+                                <div class="container">
+                                    <strong><h4>Enter Details</h4></strong>
+                                    <div class="form-group">
+                                        <label for="gender">Gender </label>
+                                        <select class="form-select" id="gender" name="gender" aria-label="Default select example" >
+                                             <option value="1">Male</option>
+                                             <option value="0">Female</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="age">Age</label>
+                                        <input type="number" class="form-control" name="age" required="required" placeholder="Age" min=1 max=100/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="hypertension">Hypertension</label>
+                                        <select class="form-select" id="hypertension" name="hypertension" aria-label="Default select example">
+                                            
+                                            <option value="1" selected>Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="heart_disease">Heart Disease</label>
+                                        <select class="form-select" id="disease" name="disease" aria-label="Default select example">
+                                            
+                                            <option value="1" selected>Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ever_married">Ever Married</label>
+                                        <select class="form-select" id="married" name="married" aria-label="Default select example">
+                                            
+                                            <option value="1" selected>Yes</option>
+                                            <option value="0">No</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="work_type">Work Type</label>
+                                        <select class="form-select" id="work" name="work" aria-label="Default select example">
+                                            
+                                            <option value="3" selected>Self-employed</option>
+                                            <option value="2">Private</option>
+                                            <option value="4">children</option>
+                                            <option value="0">Government Job</option>
+                                            <option value="1">Never_worked</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="residence_type">Residence Type</label>
+                                        <select class="form-select" id="residence" name="residence" aria-label="Default select example">
+                                            
+                                            <option value="1" selected>Urban</option>
+                                            <option value="0">Rural</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="avg_glucose_level">Average Glucose Level</label>
+                                        <input type="text" class="form-control" name="avg_glucose_level" required="required" placeholder="Average Glucose Level" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bmi">BMI</label>
+                                        <input type="text" class="form-control" name="bmi" required="required" placeholder="Body Mass Index (BMI)">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="smoking">Smoking Status</label>
+                                        <select class="form-select" id="smoking" name="smoking" aria-label="Default select example">
+                                             <option value="0">Unknown</option>
+                                            <option value="2" selected>Never smoked</option>
+                                            <option value="1">Formerly smoked</option>
+                                            <option value="3">Smokes</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-lg">Predict</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <br />
+                    <center>
+                        <h1 class="prediction">{{prediction_text}}</h1>
+                    </center>
+                    <br />
+                </div>
+            </div>
+        </div>
+</body>
+
+</html>
